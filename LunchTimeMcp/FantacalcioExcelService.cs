@@ -13,7 +13,10 @@ public static class FantacalcioExcelService
 {
     // Endpoint pattern used by site for Excel export (year and competition may vary)
     // Example discovered earlier; adjust if season changes.
-    private const string DefaultExcelUrl = "https://www.fantacalcio.it/api/v1/Excel/prices/20/1"; // 20=season id? 1=classic
+    // NOTE: The numeric path segments may change each season. Adjust if you get 403 consistently.
+    // Format observed: /api/v1/Excel/prices/{seasonId}/{gameType}
+    // seasonId: 20 (example) | gameType: 1 (classic). If forbidden, inspect network calls in browser to find current values.
+    private const string DefaultExcelUrl = "https://www.fantacalcio.it/api/v1/Excel/prices/20/1"; // TODO: keep updated
 
     private static readonly HttpClient Http = new HttpClient(new HttpClientHandler
     {
@@ -22,24 +25,42 @@ public static class FantacalcioExcelService
 
     public static async Task<string> DownloadPricesAsCsvAsync(string? excelUrl = null, string? outputFile = null)
     {
-        var url = excelUrl ?? DefaultExcelUrl;
-        var bytes = await Http.GetByteArrayAsync(url);
+        var bytes = await DownloadExcelBytesAsync(excelUrl ?? DefaultExcelUrl);
+        var csv = ParseExcelToCsv(bytes);
+        var file = outputFile ?? Path.Combine(AppContext.BaseDirectory, $"fantacalcio_excel_{DateTime.UtcNow:yyyyMMddHHmmss}.csv");
+        File.WriteAllText(file, csv, Encoding.UTF8);
+        return file;
+    }
 
-        using var ms = new MemoryStream(bytes);
+    public static async Task<byte[]> DownloadExcelBytesAsync(string url)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Get, url);
+        req.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) FantacalcioBot/1.0");
+        req.Headers.TryAddWithoutValidation("Accept", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/octet-stream, */*;q=0.8");
+        req.Headers.TryAddWithoutValidation("Referer", "https://www.fantacalcio.it/quotazioni-fantacalcio");
+        req.Headers.TryAddWithoutValidation("Accept-Language", "en-US,en;q=0.9,it;q=0.8");
+        using var resp = await Http.SendAsync(req);
+        if (!resp.IsSuccessStatusCode)
+        {
+            var status = (int)resp.StatusCode;
+            var reason = resp.ReasonPhrase;
+            throw new HttpRequestException($"Failed to download Excel (status {status} {reason}). URL may have changed or requires updated headers.");
+        }
+        return await resp.Content.ReadAsByteArrayAsync();
+    }
+
+    public static string ParseExcelToCsv(byte[] excelBytes)
+    {
+        using var ms = new MemoryStream(excelBytes);
         using var wb = new XLWorkbook(ms);
         var ws = wb.Worksheet(1);
-
-        // Heuristic: find header row by looking for a cell named "GIOCATORE" or "CALCIATORE"
-        var headerRow = ws.FirstRowUsed();
-        var firstRow = headerRow.RowUsed();
+        var headerRow = ws.FirstRowUsed() ?? throw new InvalidDataException("Could not locate header row in Excel sheet.");
+        var firstRow = headerRow.RowUsed() ?? throw new InvalidDataException("Header row appears empty.");
 
         var headers = new List<string>();
         foreach (var cell in firstRow.Cells())
-        {
             headers.Add(cell.GetString().Trim());
-        }
 
-        // Map columns we care about (flexible if order shifts)
         int idxPlayer = IndexOf(headers, "GIOCATORE", "CALCIATORE", "NOME");
         int idxTeam = IndexOf(headers, "SQUADRA", "TEAM");
         int idxRole = IndexOf(headers, "R", "RUOLO", "ROLE");
@@ -52,9 +73,7 @@ public static class FantacalcioExcelService
 
         foreach (var row in ws.RowsUsed().Skip(1))
         {
-            string Get(int idx)
-                => idx >= 0 ? row.Cell(idx + 1).GetString().Trim() : string.Empty;
-
+            string Get(int idx) => idx >= 0 ? row.Cell(idx + 1).GetString().Trim() : string.Empty;
             var role = NormalizeRole(Get(idxRole));
             var player = Get(idxPlayer);
             if (string.IsNullOrWhiteSpace(player)) continue;
@@ -62,13 +81,9 @@ public static class FantacalcioExcelService
             var initial = Get(idxInitial);
             var current = Get(idxCurrent);
             var fvm = Get(idxFvm);
-
             sb.AppendLine(string.Join(',', Csv(role), Csv(player), Csv(team), Csv(initial), Csv(current), Csv(fvm)));
         }
-
-        var file = outputFile ?? Path.Combine(AppContext.BaseDirectory, $"fantacalcio_excel_{DateTime.UtcNow:yyyyMMddHHmmss}.csv");
-        File.WriteAllText(file, sb.ToString(), Encoding.UTF8);
-        return file;
+        return sb.ToString();
     }
 
     private static int IndexOf(List<string> headers, params string[] options)

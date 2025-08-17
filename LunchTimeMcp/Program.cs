@@ -8,7 +8,8 @@ var builder = Host.CreateEmptyApplicationBuilder(settings: null);
 builder.Services
     .AddMcpServer()
     .WithStdioServerTransport()
-    .WithTools<RestaurantTools>();
+    .WithTools<RestaurantTools>()
+    .WithTools<FantacalcioTools>(); // Added
 
 builder.Services.AddSingleton<RestaurantService>();
 

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LunchTimeMcp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+44e682118b7d3c6ec5341040ecb0a0d5cf28db53")]
 [assembly: System.Reflection.AssemblyProductAttribute("LunchTimeMcp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LunchTimeMcp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

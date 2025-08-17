@@ -1,0 +1,14 @@
+# Existing ignores ...
+# Build output
+bin/
+obj/
+**/bin/
+**/obj/
+
+# VS / IDE
+.vs/
+.vscode/
+*.user
+
+# Fantacalcio generated CSV
+fantacalcio_players_*.csv

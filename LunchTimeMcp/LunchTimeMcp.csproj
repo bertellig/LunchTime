@@ -11,5 +11,6 @@
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
       <PackageReference Include="ModelContextProtocol" Version="0.3.0-preview.1" />
       <PackageReference Include="System.Text.Json" Version="9.0.6" />
+  <PackageReference Include="ClosedXML" Version="0.103.0" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,25 @@
+{
+  // Build and run tasks for LunchTimeMcp
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build LunchTimeMcp",
+      "type": "shell",
+      "command": "dotnet",
+      "args": ["build", "LunchTimeMcp/LunchTimeMcp.csproj"],
+      "group": "build",
+      "problemMatcher": ["$msCompile"],
+      "presentation": {"reveal": "always"}
+    },
+    {
+      "label": "run LunchTimeMcp",
+      "type": "shell",
+      "command": "dotnet",
+      "args": ["run", "--project", "LunchTimeMcp/LunchTimeMcp.csproj"],
+      "group": "none",
+      "dependsOn": ["build LunchTimeMcp"],
+      "problemMatcher": ["$msCompile"],
+      "presentation": {"reveal": "always"}
+    }
+  ]
+}

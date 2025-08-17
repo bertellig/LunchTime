@@ -7,7 +7,9 @@ obj/
 
 # VS / IDE
 .vs/
-.vscode/
+# VS Code settings (ignore all except tasks.json)
+.vscode/*
+!.vscode/tasks.json
 *.user
 
 # Fantacalcio generated CSV

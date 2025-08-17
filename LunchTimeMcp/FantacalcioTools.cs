@@ -13,4 +13,11 @@ public sealed class FantacalcioTools
     {
         return await FantacalcioHtmlScraper.DownloadCsvAsync(url);
     }
+
+    [McpServerTool, Description("Download Fantacalcio official Excel quotations and convert to CSV. Returns file path.")]
+    public async Task<string> ScrapeExcelAsync(
+        [Description("Optional Excel API URL override")] string? excelUrl = null)
+    {
+        return await FantacalcioExcelService.DownloadPricesAsCsvAsync(excelUrl);
+    }
 }

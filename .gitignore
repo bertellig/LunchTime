@@ -7,9 +7,10 @@ obj/
 
 # VS / IDE
 .vs/
-# VS Code settings (ignore all except tasks.json)
+# VS Code settings (ignore all except tasks.json and mcp.json)
 .vscode/*
 !.vscode/tasks.json
+!.vscode/mcp.json
 *.user
 
 # Fantacalcio generated CSV

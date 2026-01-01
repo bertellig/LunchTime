@@ -1,14 +1,12 @@
 {
-	"servers": {
+	"mcpServers": {
 		"LunchTime": {
-			"type": "stdio",
 			"command": "dotnet",
 			"args": [
 				"run",
 				"--project",
-				"C:\\Users\\GGBer\\OneDrive\\Developer\\mcp\\letslearnmcp-csharp\\LunchTime\\LunchTimeMcp\\LunchTimeMcp.csproj"
+				"${workspaceFolder}/LunchTimeMcp/LunchTimeMcp.csproj"
 			]
 		}
-	},
-	"inputs": []
+	}
 }
